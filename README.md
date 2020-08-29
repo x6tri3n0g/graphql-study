@@ -234,8 +234,83 @@ server.start(() => console.log('GraphQL Server Running'));
 <br />
 
 이렇게 Graphql yoga를 통해 서버를 실행시킬 수 있게 되었습니다.
-콘솔에서 `Error: No schema defined ...`라는 메시지를 볼 수 있을 것입니다. 여기서 `schema`는 우리가 사용자에게 보내거나 사용자로부터 받을 data에 대한 설명입니다.
+콘솔에서 `Error: No schema defined ...`라는 메시지를 볼 수 있을 것입니다. 여기서 `schema`는 우리가 사용자에게 보내거나 사용자로부터 받을 data에 대한 설명입니다. `schema`를 작성하는 방법은 다음 Section에서 알아보겠습니다.
 
 <br />
 <br />
 <br />
+
+## Creating the first Query and Resolver
+
+`schema`는 우리가 받거나 줄 정보에 대한 서술입니다. GraphQL의 사용을 위해서 `schema`를 통해 무엇을 주고 받을 것인지 이해해야합니다.
+
+<br />
+
+`graphql` 폴더를 생성하고 그 안에 `schema.graphql` 파일을 생성합니다. 이 파일 안에서는 Query를 작성합니다. Query는 우리가 받을 정보를 정의할 때 작성합니다. GraphQL은 이런 specification(자세한 설명)과 서버에 이러한 유형들을 정의해 놓고 있습니다. 이제 우리가 GraphQL 서버에 할 것은 어떤 Mutations(변형) 그리고 어떤 Query들을 우리가 가졌는지 알려줘야 합니다. 이것을 위해 첫 번째 Query를 선언해보겠습니다. 여기에는 사용자에게 주는 모든 정보들을 Query에 넣겠습니다.
+
+<br />
+
+```
+type Query {
+    name: String!   // !는 required(필수값이다)를 의미함
+}
+```
+
+<br />
+
+이것이 Query에 대한 설명이며 index.js에 적용해 봅시다.
+
+<br />
+
+```
+...
+    const server = new GraphQLServer({
+        typeDefs: "graphql/schema.graphql"
+    });
+...
+```
+
+<br />
+
+아직까지는 서버를 start 하더라도 이전과 차이가 없습니다. 왜냐하면 Resolver를 완성시키지 않았기 때문입니다. 아직은 단지 어떤 사용자가 Query에 이름을 보내면 String type의 데이터를 보낸다는 설명을 작성해준 것입니다. 이제부터 우리는 실제로 name Query의 기능부를 작성해야 합니다.
+
+<br />
+
+`/graphql` 폴더 아래에 `resolvers.js` 파일을 생성합니다. 여기서 Resolver는 Query를 resolve(해결)하는 것을 의미합니다. Query란 Database에게 문제 같은 것입니다. 그래서 우리는 Query를 어떤 방식으로 resolve(해결)해야 합니다. 이것을 Resolver가 해결합니다. `resolvers.js`를 작성해 봅시다.
+
+<br />
+
+```
+const resolvers = {
+    Query: {
+        name: () => 'xtring',
+    },
+};
+
+export default resolvers;
+```
+
+<br />
+
+정확히 말하자면 Query를 설명해준 것이며 Resolvers를 프로그래밍했습니다. 보시다시피 GraphQL에서는 View나 URLs 같은 것은 보이지 않습니다. 오직 `Query`와 `Resolvers`만 있을 뿐입니다. 그리고 Resolvers를 우리가 원하는 대로 프로그래밍 할 수 있습니다. 어떤 Database에서 또 다른 Database로 갈 수도 있고 메모리로도 갈 수 있고, 다른 API로도 갈 수 있습니다.(? - 아직 정확히 이해하지 못함) 지금의 경우엔 그냥 이름값('xtring')를 리턴했습니다.
+
+<br />
+
+이제 resolvers를 index.js에 import 해줍니다.
+
+```
+import { GraphQLServer } from 'graphql-yoga';
+import resolvers from './graphql/resolvers';
+
+const server = new GraphQLServer({
+    typeDefs: 'graphql/schema.graphql',
+    resolvers, // resolvers: resolvers, // => ES6 문법의 "파괴할당"
+});
+
+server.start(() => console.log('GraphQL Server Running'));
+```
+
+<br />
+
+이제 콘솔을 확인하면 `GraphQL Server Running`이라는 문구를 확인할 수 있습니다.
+브라우저에서 `localhost:4000`에 접근하게 되면 `GraphQL Playground`가 나옵니다. `GraphQL Playground`는 `GraphQL yoga` 안에 내장되어 있는 것입니다.

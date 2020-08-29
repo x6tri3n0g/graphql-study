@@ -313,4 +313,28 @@ server.start(() => console.log('GraphQL Server Running'));
 <br />
 
 이제 콘솔을 확인하면 `GraphQL Server Running`이라는 문구를 확인할 수 있습니다.
-브라우저에서 `localhost:4000`에 접근하게 되면 `GraphQL Playground`가 나옵니다. `GraphQL Playground`는 `GraphQL yoga` 안에 내장되어 있는 것입니다.
+브라우저에서 `localhost:4000`에 접근하게 되면 `GraphQL Playground`가 나옵니다. `GraphQL Playground`는 `GraphQL yoga` 안에 내장되어 있는 것입니다. 여기서 잠깐의 예시로 왼쪽 필드에서
+
+<br />
+
+```
+query {
+    name
+}
+```
+
+을 입력하면
+
+<br />
+
+```
+{
+  "data": {
+    "name": "xtring"
+  }
+}
+```
+
+과 같은 결과가 나오는 것을 확인 할 수 있습니다.
+
+<br />

@@ -4,13 +4,11 @@ Movie API with Graphql
 
 <br />
 
-> 서버에서 Graphql로 API 제공하기
-> [Nomad Coders 강의 - GraphQL로 영화 API 만들기](https://nomadcoders.co/graphql-for-beginners/lobby)
+> 서버에서 Graphql로 API 제공하기<br/ >[Nomad Coders 강의 - GraphQL로 영화 API 만들기](https://nomadcoders.co/graphql-for-beginners/lobby)
 
 <br />
 
-Using `graphql-yoga`
-`Node.js`, `JavaScript`, `Back-end`를 베이스로 영화 API를 제공하는 서버를 만들어 봅시다.
+Using `graphql-yoga`, `Node.js`, `JavaScript`, `Back-end`를 베이스로 영화 API를 제공하는 서버를 만들어 봅시다.
 
 <br />
 
@@ -26,12 +24,9 @@ $ yarn add graphql-yoga
 
 <br />
 <br />
-
-## Graphql 서버 만들기
-
 <br />
 
-### Over-fetching과 Under-fetching
+## Over-fetching과 Under-fetching
 
 RESTful API를 제공하는 서버에서는 `/users/ GET`형태로 user들의 정보를 불러옵니다. 이러한 형태로 user의 정보를 모두 불러오게 될 경우 예를 들어 `사용자명`, `성`, `이메일`, `프로필 이미지` 등 많은 데이터들이 묶인 패키지를 보낼 것입니다. 이처럼 한번의 요청에서 필요한 데이터들은 사용하지 않을 데이터까지 모두 요청할 수 있기 때문에 Database에게 무리한 데이터 요청을 보낼 수 있습니다.
 
@@ -124,6 +119,122 @@ query {
 <br />
 
 여기까지 `GraphQL`을 사용하는 장점과 특징에 대해서 알아보았습니다.
+
+<br />
+<br />
+<br />
+
+## Creating a GraphQL Server with GraphQL Yoga
+
+<br />
+
+### 환경설정과 서버 실행하기
+
+우리는 먼저 `graphql-yoga`를 설치했고 추가적으로 `nodemon`을 설치합니다.
+
+<br />
+
+```
+$ yarn global add nodemon
+```
+
+<br />
+
+`nodemon`은 파일을 수정할 때마다 서버를 재시작 해줍니다. 위 명령어를 통해 `nodemon`이 설치되었다면 `package.json`에서 아래 script를 추가해줍니다.
+
+<br />
+
+```
+...
+    "script" : {
+        "start": "nodemon"
+    }
+}
+```
+
+이제 nodemon이 index.js 파일을 주시합니다.
+
+<br />
+
+root에 `index.js` 파일을 만들고 `console.log('Sup');`를 작성합니다.
+그리고 `yarn start`해봅니다. 그렇다면 콘솔창에서 바로 Sup이라는 단어를 볼 수 있을 것입니다. 그리고 `console.log('Sup');`를 수정하는 즉시 콘솔창에 나타납니다.(WoW)
+
+<br />
+
+지금부터 서버를 만들어 봅시다.
+
+<br />
+
+```
+const graphql = require('graphql-yoga');
+```
+
+<br />
+
+가 아닌 ES6 문법을 사용하기 위해
+
+<br />
+
+```
+$ yarn add babel-node --dev
+```
+
+을 실행합니다. 그리고 `package.json`에서
+
+<br />
+
+```
+...
+    "start": "nodemon --exec babel-node index.js"
+...
+```
+
+<br / >
+
+이를 통해 import 문법을 사용할 수 있게 되었습니다.
+
+```
+import { GraphQLServer } from 'graphql-yoga';
+```
+
+Project의 root에서 `.babelrc` 파일을 생성합니다. 그리고 `babel` 설정에 필요한 라이브러리를 다운로드합니다.
+
+<br />
+
+```
+$ yarn add babel-cli babel-preset-env babel-preset-stage-3 --dev
+```
+
+<br />
+
+`.babelrc` 파일을 작성합니다.
+
+```
+{
+    "presents": ["env", "stage-3"]
+}
+```
+
+<br />
+
+그리고 `index.js`에 아래 코드를 작성합니다.
+
+<br />
+
+```
+import { GraphQLServer } from 'graphql-yoga';
+
+const server = new GraphQLServer({
+    /* Magic! */
+});
+
+server.start(() => console.log('GraphQL Server Running'));
+```
+
+<br />
+
+이렇게 Graphql yoga를 통해 서버를 실행시킬 수 있게 되었습니다.
+콘솔에서 `Error: No schema defined ...`라는 메시지를 볼 수 있을 것입니다. 여기서 `schema`는 우리가 사용자에게 보내거나 사용자로부터 받을 data에 대한 설명입니다.
 
 <br />
 <br />

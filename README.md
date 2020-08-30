@@ -400,4 +400,208 @@ export default resolvers;
 지금까지 해본 실습을 통해 어느정도 감이 오시나요? schema.graphql 파일은 받아올 데이터에 대한 정보(schema)를 가지고 있으며 resolvers는 데이터베이스와의 연결을 통해 query를 제공하는 역할을 하는 것 같습니다. 
 
 <br />
+<br />
+<br />
+
+## Extending the Schema part Two
+이번엔 조금 더 복잡한 Query를 작성해 봅시다.
+
+<br />
+
+이번엔 People! 즉, 한명 이상의 Person을 전송할 수 있도록 해봅시다. 
+
+<br />
+
+> schema.graphql
+```
+type Person {
+    name: String!
+    age: Int!
+    gender: String!
+}
+
+type Query {
+    people: [Person]!
+}
+```
+
+<br />
+
+Query에 정의된 people은 Person을 Array 형태로 가져옵니다. 그리고 Person을 Array로 가져오기 위해서는 각 Person을 구분하기 위한 ID가 필요합니다.
+
+<br />
+
+```
+...
+type Query {
+    people: [Person]!
+    person(id: Int!): Person!
+}
+```
+
+<br />
+
+여기서 리턴할 것은 우리가 찾은 person입니다. 아직 여기에는 필수사항들을 입력하지 않았습니다. 왜냐하면 해당하는 person을 찾지 못할 수도 있기 때문입니다. 이제 Query를 수정해볼게요. `resolvers.js`를 수정합니다.
+
+<br />
+
+```
+const people = [
+    {
+        id: '0',
+        name: 'hyun',
+        age: 27,
+        gender: 'male',
+    },
+    {
+        id: '1',
+        name: 'young',
+        age: 25,
+        gender: 'female',
+    },
+    {
+        id: '2',
+        name: 'kidong',
+        age: 27,
+        gender: 'male',
+    },
+    {
+        id: '3',
+        name: 'sungyun',
+        age: 27,
+        gender: 'male',
+    },
+    {
+        id: '4',
+        name: 'hijin',
+        age: 24,
+        gender: 'female',
+    },
+    {
+        id: '5',
+        name: 'minki',
+        age: 26,
+        gender: 'male',
+    },
+];
+
+const resolvers = {
+    Query: {
+        people: () => people,
+    },
+};
+
+export default resolvers;
+```
+
+<br />
+
+파일이 너무 커졌습니다. graphql 폴더 안에 db.js 파일을 생성합니다. 그리고 아래와 같이 작성합니다.
+
+<br />
+
+```
+export const people = [
+    {
+        id: '0',
+        name: 'hyun',
+        age: 27,
+        gender: 'male',
+    },
+    {
+        id: '1',
+        name: 'young',
+        age: 25,
+        gender: 'female',
+    },
+    {
+        id: '2',
+        name: 'kidong',
+        age: 27,
+        gender: 'male',
+    },
+    {
+        id: '3',
+        name: 'sungyun',
+        age: 27,
+        gender: 'male',
+    },
+    {
+        id: '4',
+        name: 'hijin',
+        age: 24,
+        gender: 'female',
+    },
+    {
+        id: '5',
+        name: 'minki',
+        age: 26,
+        gender: 'male',
+    },
+];
+```
+
+<br />
+
+그리고 resolvers.js에서 db.js의 people을 import 해줍니다.
+
+<br />
+
+```
+import { people } from './db';
+
+...
+```
+
+<br />
+
+마지막으로 추가한 Person에 대한 Id schema를 작성해줘야겠죠? schema.graphql 파일을 수정합니다.
+
+<br />
+
+```
+type Person {
+    id: Int!
+    name: String!
+...
+```
+
+<br />
+
+이제 서버를 재실행하고 Playground를 Refresh한 뒤에 id 값을 불러와봅시다. 잘 실행되죠?
+Graphql를 사용하면 어떤 종류의 특별한 Database Back-end가 필요 없습니다. 오직 resolver가 리턴하라고 하는 것만 잘 리턴한다면 말이죠.
+
+<br />
+
+이번엔 이제부터 우리가 받아올 영화 데이터를 잘 걸러서 보여주기 위해서 id를 필터링하는 작업을 해보겠습니다. 일단은 이전에 예제를 연습하겠습니다.
+
+<br />
+
+> db.js
+
+```
+...
+export const getById = (id) => {
+    const filteredPeople = people.filter((person) => person.id === id);
+    return filteredPeople[0];
+};
+```
+
+<br />
+
+위 function을 통해서 우리는 해당 ID와 맞는 대상만을 리턴할 것입니다.
+resolver의 Query를 수정합니다.
+
+<br />
+
+```
+...
+    Query: {
+        people: () => people,
+        person: () => id === getById(),
+    },
+...
+```
+
+<br />
 

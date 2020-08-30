@@ -1,12 +1,9 @@
-const xtring = {
-    name: 'hyun',
-    age: 27,
-    gender: 'male',
-};
+import { getById, people } from './db';
 
 const resolvers = {
     Query: {
-        person: () => xtring,
+        people: () => people,
+        person: () => id === getById(),
     },
 };
 

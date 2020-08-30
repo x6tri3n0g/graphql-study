@@ -676,7 +676,7 @@ export const getById = (id) => {
 };
 ```
 
-* 여기서 getById()를 수정한 이유는 우리가 가진 데이터의 person.id가 현재 String type이기 때문에 filter() 실행 시 getById(id)에서 받아온 argument인 id의 Int와 충돌이 나기 때문입니다.
+-   여기서 getById()를 수정한 이유는 우리가 가진 데이터의 person.id가 현재 String type이기 때문에 filter() 실행 시 getById(id)에서 받아온 argument인 id의 Int와 충돌이 나기 때문입니다.
 
 <br />
 
@@ -714,7 +714,7 @@ export const getById = (id) => {
 
 우리는 결국 어떤 실행을 할지에 대한 질문을 작성하고 해결책을 만드는 것입니다. Resolver는 어떤 것이든 불러올 수 있습니다. 그것이 또 다른 서버의 API이든 어떤 하나의 Database 이든...
 
-* Nicolas는 Resolver를 View와 같다고 말하고 Schema는 URLs와 같다고 말합니다.(왜냐하면 어디로 갈지 정해주는 것과 같다고 해서 입니다. 하지만 실제로 URL을 통한 요청을 하고 있지는 않죠.) 
+-   Nicolas는 Resolver를 View와 같다고 말하고 Schema는 URLs와 같다고 말합니다.(왜냐하면 어디로 갈지 정해주는 것과 같다고 해서 입니다. 하지만 실제로 URL을 통한 요청을 하고 있지는 않죠.)
 
 > Resolvers는 Schema의 요구사항을 토대로 서버를 통해서 Data를 가져옵니다.
 
@@ -726,4 +726,178 @@ export const getById = (id) => {
 <br />
 <br />
 
-##
+## Defining Mutations
+
+먼저 `db.js`에 Movies 데이터를 작성해봅니다.
+
+<br />
+
+```
+let movies = [
+    {
+        id: 0,
+        name: 'Start Wars - The new one',
+        score: 1,
+    },
+    {
+        id: 1,
+        name: 'Avengers - The new one',
+        score: 8,
+    },
+    {
+        id: 2,
+        name: 'The Godfather I',
+        score: 99,
+    },
+    {
+        id: 3,
+        name: 'Logan',
+        score: 2,
+    },
+];
+
+export const getMovies = () => movies;
+
+export const getById = (id) => {
+    const filteredMovies = movies.filter((movie) => movie.id === id);
+    return filteredMovies[0];
+};
+
+export const deletMovie = (id) => {
+    const cleanMovies = movies.filter((movie) => movie.id !== id);
+    if (movies.length > cleanMovies.length) {
+        movies = cleanMovies;
+        return true;
+    } else {
+        return false;
+    }
+};
+```
+
+<br />
+
+새로운 DB data와 function을 만들었고 Movie에 대한 schema와 resolver를 작성해봅시다.
+
+<br />
+
+> schema.graphql
+
+```
+type Movie {
+    id: Int!
+    name: String!
+    score: Int!
+}
+
+type Query {
+    movies: [Movie]!
+    movie(id: Int!): Movie
+}
+```
+
+<br />
+
+> resolvers.js
+
+```
+import { getById, getMovies } from './db';
+
+const resolvers = {
+    Query: {
+        movies: () => getMovies(),
+        movie: (_, { id }) => getById(id),
+    },
+};
+
+export default resolvers;
+```
+
+<br />
+
+그럼 이제 Playground에서 query를 날려서 데이터를 받아볼까요?
+
+<br />
+
+```
+{
+  movies {
+    name
+    score
+  }
+}
+```
+
+<br />
+
+> 결과
+
+```
+{
+  "data": {
+    "movies": [
+      {
+        "name": "Start Wars - The new one",
+        "score": 1
+      },
+      {
+        "name": "Avengers - The new one",
+        "score": 8
+      },
+      {
+        "name": "The Godfather I",
+        "score": 99
+      },
+      {
+        "name": "Logan",
+        "score": 2
+      }
+    ]
+  }
+}
+```
+
+<br />
+
+이 처럼 우리가 원하는 어떤 Database라도 가져다 쓸 수 있습니다.
+`Mutation`에 대해서 알아봅시다. `Mutation`은 Database 상태가 변할 때 사용되는 것입니다. Mutation은 우리가 원하는 만큼 정의할 수 있습니다. 우리가 얼마나 많은 type들을 정의했는지 상관하지 않습니다. 하지만 GraphQL에게 우리의 Mutation이나 Query를 요청하길 원한다면 그것들을 `type Query`와 `type Mutation`에 넣어야 합니다. Mutation을 정의해봅시다.
+
+<br />
+
+```
+// schema.graphql
+...
+type Mutation {
+    addMovie(name: String!, score: Int!): Movie!
+}
+```
+
+<br />
+
+여기서 id는 특별히 입력하지 않아도 됩니다. 왜냐하면 Movie의 id는 필수값으로 자동 생성될 것이기 때문입니다. 위의 새로운 `type Mutation`이 Mutation입니다. Database의 상태를 변화시킬 때 사용합니다.
+
+resolvers.js에서 Mutation을 추가해줍니다.
+
+<br />
+
+```
+...
+const resolvers = {
+    Query: {
+        movies: () => getMovies(),
+        movie: (_, { id }) => getById(id),
+    },
+    // under lines
+    Mutation: {
+        addMovie: (_, { name, score }) => {},
+    },
+};
+...
+```
+
+<br />
+
+이제 우리는 다음 Section에서 Mutation을 통해 뭔가를 리턴하는 작업을 해보겠습니다.
+
+<br />
+<br />
+<br />

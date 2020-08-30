@@ -901,3 +901,92 @@ const resolvers = {
 <br />
 <br />
 <br />
+
+## Creating first Mutation
+
+계속해서 Mutation을 작성해봅시다.
+먼저 resolvers의 Mutaion을 정의합니다.
+
+<br />
+
+```
+// resolvers.js
+...
+    Mutation: {
+        addMovie: (_, { name, score }) => addMovie(name, score),
+    },
+...
+```
+
+<br />
+
+그리고 db.js에서 addMovie()를 작성해보겠습니다.
+
+<br />
+
+```
+// db.js
+...
+
+export const addMovie = (name, score) => {
+    const newMovie = {
+        id: `${movies.length + 1}`,
+        name,
+        score,
+    };
+    movies.push(newMovie);
+    return newMovie;
+};
+```
+
+<br />
+
+위 코드를 모두 작성한 뒤 Playground로 돌아가서 Mutation을 실행해봅시다.
+
+<br />
+
+```
+mutation {
+  addMovie(name: "Transformer", score: 9) {
+    name
+    score
+  }
+}
+```
+
+<br />
+
+위와 같은 Mutation을 실행 시키면 addMovie를 통해 영화정보가 입력됩니다. Mutation을 실행하고 query을 통해 movie의 정보를 모두 불러와보면 아래와 같은 결과를 볼 수 있습니다.
+
+<br />
+
+> 결과
+
+```
+{
+  "data": {
+    "movies": [
+      {
+        "name": "Start Wars - The new one",
+        "score": 1
+      },
+      {
+        "name": "Avengers - The new one",
+        "score": 8
+      },
+      {
+        "name": "The Godfather I",
+        "score": 99
+      },
+      {
+        "name": "Logan",
+        "score": 2
+      },
+      {
+        "name": "Transformer",
+        "score": 9
+      }
+    ]
+  }
+}
+```

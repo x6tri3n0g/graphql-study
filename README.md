@@ -397,22 +397,24 @@ export default resolvers;
 
 <br />
 
-지금까지 해본 실습을 통해 어느정도 감이 오시나요? schema.graphql 파일은 받아올 데이터에 대한 정보(schema)를 가지고 있으며 resolvers는 데이터베이스와의 연결을 통해 query를 제공하는 역할을 하는 것 같습니다. 
+지금까지 해본 실습을 통해 어느정도 감이 오시나요? schema.graphql 파일은 받아올 데이터에 대한 정보(schema)를 가지고 있으며 resolvers는 데이터베이스와의 연결을 통해 query를 제공하는 역할을 하는 것 같습니다.
 
 <br />
 <br />
 <br />
 
 ## Extending the Schema part Two
+
 이번엔 조금 더 복잡한 Query를 작성해 봅시다.
 
 <br />
 
-이번엔 People! 즉, 한명 이상의 Person을 전송할 수 있도록 해봅시다. 
+이번엔 People! 즉, 한명 이상의 Person을 전송할 수 있도록 해봅시다.
 
 <br />
 
 > schema.graphql
+
 ```
 type Person {
     name: String!
@@ -604,4 +606,124 @@ resolver의 Query를 수정합니다.
 ```
 
 <br />
+<br />
+<br />
 
+## Creating Quries with Arguments
+
+그렇다면 유저가 우리한테 준 ID를 어떻게 받을 수 있을까요?
+
+<br />
+
+GraphQL Resolvers는 GraphQL 서버에서 요청을 받습니다. GraphQL 서버가 Query나 Mutation의 정의를 발견하면 Resolver를 찾을 것이고, 해당 함수를 실행할 것입니다. 여기서 argument를 주기는 하는데 여러가지 방법으로 활용할 수도 있습니다. 첫번째 argument는 Object를 보내며 현재는 별로 중요하지 않습니다. 한번 실행해 볼까요?
+
+아래 코드를 작성하고
+
+<br />
+
+```
+const resolvers = {
+    Query: {
+        people: () => people,
+        person: (_, args) => {
+            console.log(args);
+        },
+    },
+};
+```
+
+<br />
+
+Playground에서 Server에 요청을 해봅시다. 새로운 탭을 만들고 아래와 같이 작성한 후 run 해봅니다.
+
+<br />
+
+```
+{
+  person(id: 1) {
+    name
+  }
+}
+```
+
+<br />
+
+그렇다면 콘솔창에서 받아온 args에 대한 값을 확인할 수 있습니다! `{ id: 1 }`
+이번엔 `getById(id)`를 리턴해보겠습니다.
+
+<br />
+
+resolvers의 Query를 수정하고 db.js에서 getById()를 약간 수정해줍니다.
+
+```
+// resolvers.js
+...
+    Query: {
+        people: () => people,
+        person: (_, { id }) => getById(id),
+    },
+...
+```
+
+<br />
+
+```
+// db.js
+...
+export const getById = (id) => {
+    const filteredPeople = people.filter((person) => person.id === String(id));
+    return filteredPeople[0];
+};
+```
+
+* 여기서 getById()를 수정한 이유는 우리가 가진 데이터의 person.id가 현재 String type이기 때문에 filter() 실행 시 getById(id)에서 받아온 argument인 id의 Int와 충돌이 나기 때문입니다.
+
+<br />
+
+이제 Playground에서 아래와 같이 작성한 Query를 날려보면 해당하는 id에 대한 데이터가 잘 날라오네요.
+
+<br />
+
+```
+{
+  person(id: 1) {
+    name
+  }
+}
+```
+
+<br />
+
+> 결과
+
+```
+{
+  "data": {
+    "person": {
+      "name": "young"
+    }
+  }
+}
+```
+
+<br />
+
+만약 우리가 가지고 있지 않은 데이터인 `id: 10`에 대한 데이터를 요청하면 당연히 해당 값은 `null`을 리턴하겠죠?
+
+지금까지 배워본 GraphQL이 무엇인가에 대한 요점을 정리 해보자면 Operation(우리 프로젝트의 `schema.graphql`)에서 우리가 서버의 데이터를 어떻게 보여줄지 정의하고 Operation(질문)을 resolve(해결하는) 함수를 만드는 것입니다.
+
+우리는 결국 어떤 실행을 할지에 대한 질문을 작성하고 해결책을 만드는 것입니다. Resolver는 어떤 것이든 불러올 수 있습니다. 그것이 또 다른 서버의 API이든 어떤 하나의 Database 이든...
+
+* Nicolas는 Resolver를 View와 같다고 말하고 Schema는 URLs와 같다고 말합니다.(왜냐하면 어디로 갈지 정해주는 것과 같다고 해서 입니다. 하지만 실제로 URL을 통한 요청을 하고 있지는 않죠.) 
+
+> Resolvers는 Schema의 요구사항을 토대로 서버를 통해서 Data를 가져옵니다.
+
+<br />
+
+지금부터 영화 데이터를 가져오고 `GraphQL`를 통해 요청하는 방법을 알아봅시다.
+
+<br />
+<br />
+<br />
+
+##

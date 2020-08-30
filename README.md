@@ -338,3 +338,66 @@ query {
 과 같은 결과가 나오는 것을 확인 할 수 있습니다.
 
 <br />
+<br />
+<br />
+
+## Extending the Schema
+
+우리는 `schema.graphql`에서 데이터의 type(데이터 유형)을 작성해줌으로서 데이터를 요청하는데 약속을 만들어 냅니다. 이것을 통해 요청하는 데이터에 대한 조건을 안전하게 만들 수 있습니다.
+
+<br />
+
+`Playground`는 무엇일까요? `Playground`는 `graphql-yoga`에 따라오는 것인데 우리의 Database를 테스트 해줍니다. 그것이 전부입니다.(일종의 Postman과 같은...) 그렇다면 `Playground`는 `localhost:4000`에서 확인할 수 있습니다. 여기서 `localhost:4000/graphql`를 입력하여 들어가보면 우리 GraphQL의 종점(End-point)에 접근이 가능합니다.
+
+<br />
+
+Query는 data이며 JSON data와 같은 것 입니다. 그렇기 때문에 이것을 어딘가로 보내줘야하는데 그것을 POST라고 합니다. 모든 Query들, Mutation들, 등등 뭐든지... 항상 POST 형태로 보내지게 됩니다. 왜냐하면 서버가 받아야 그에 대한 반응(response)을 줄 수 있기 때문입니다.
+
+<br />
+
+먼저, `graphql/schema.graphql`를 수정해봅시다.
+
+<br/>
+
+```
+type Xtring {
+    name: String!
+    age: Int!
+    gender: String!
+}
+
+type Query {
+    person: Xtring!
+}
+```
+
+<br />
+
+그리고 `graphql/resolvers.js` 파일을 아래와 같이 수정합니다.
+
+```
+const xtring = {
+    name: 'hyun',
+    age: 27,
+    gender: 'male',
+};
+
+const resolvers = {
+    Query: {
+        person: () => xtring,
+    },
+};
+
+export default resolvers;
+```
+
+<br />
+
+서버를 재실행하게 되면 resolver는 `schema.graphql`에 의해 데이터를 가져올 준비를 합니다. `localhost:4000`의 Playground에 접근해 봅니다. Playground 오른쪽에 `Schema`와 `Docs`가 있습니다. 여기서 `Schema`를 클릭하면 우리가 query를 통해 가져올 수 있는 데이터를 확인할 수 있습니다. 즉, Front-end가 참고하는 API와 같습니다.
+
+<br />
+
+지금까지 해본 실습을 통해 어느정도 감이 오시나요? schema.graphql 파일은 받아올 데이터에 대한 정보(schema)를 가지고 있으며 resolvers는 데이터베이스와의 연결을 통해 query를 제공하는 역할을 하는 것 같습니다. 
+
+<br />
+

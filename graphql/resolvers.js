@@ -1,6 +1,12 @@
+const xtring = {
+    name: 'hyun',
+    age: 27,
+    gender: 'male',
+};
+
 const resolvers = {
     Query: {
-        name: () => 'xtring',
+        person: () => xtring,
     },
 };
 

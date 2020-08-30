@@ -990,3 +990,132 @@ mutation {
   }
 }
 ```
+
+<br />
+<br />
+<br />
+
+## Delete Mutation
+
+이번에는 movie Data를 제거해보겠습니다.
+
+<br />
+
+> db.js
+
+```
+...
+
+export const deleteMovie = (id) => {
+    const cleanMovies = movies.filter((movie) => movie.id !== id);
+    if (movies.length > cleanMovies.length) {
+        movies = cleanMovies;
+        return true;
+    } else {
+        return false;
+    }
+};
+
+...
+```
+
+<br />
+
+저번 Section에서 작성된 deleteMovie 함수를 resolvers에 import 합니다.
+
+<br />
+
+```
+import { deleteMovie, ...} from './db';
+
+...
+
+    Mutation: {
+        addMovie: (_, { name, score }) => addMovie(name, score),
+        deleteMovie: (_, { id }) => deleteMovie(id),
+    },
+
+...
+```
+
+<br />
+
+그리고 schema의 Mutation에도 deleteMovie를 추가해줍니다.
+
+<br />
+
+> schema.graphql
+
+```
+...
+type Mutation {
+    addMovie(name: String!, score: Int!): Movie!
+    deleteMovie(id: Int!): Boolean! // add this line!
+}
+```
+
+<br />
+
+Playground에서 mutation을 작성하고 결과를 봅시다!
+
+<br />
+
+```
+mutation {
+  deleteMovie(id: 0)
+}
+```
+
+하게 되면
+
+<br />
+
+id가 0인 영화 데이터가 제거됩니다.
+
+```
+{
+  "data": {
+    "deleteMovie": true
+  }
+}
+```
+
+<br />
+
+> 결과
+
+```
+{
+  "data": {
+    "movies": [
+      {
+        "id": 1,
+        "name": "Avengers - The new one",
+        "score": 8
+      },
+      {
+        "id": 2,
+        "name": "The Godfather I",
+        "score": 99
+      },
+      {
+        "id": 3,
+        "name": "Logan",
+        "score": 2
+      }
+    ]
+  }
+}
+```
+
+<br />
+
+결과를 잘 확인하셨나요? 
+Server를 다시 껐다 키면 movies는 원래 상태로 돌아갈 것입니다. 왜냐하면 우리가 본 결과들은 결국 memory에서 동작한 것들이기 때문입니다. 하지만 어떤 Back-end를 연결한다면 GraphQL을 적용할 수 있습니다. 그리고 그 Back-end API와 대화할 수 있습니다. 즉, client는 GraphQL 언어로 대화하고 이 GraphQL 서버를 가져가 다른 API와 대화할 수 있습니다. 이 다음 섹션에서 GraphQL 서버와 REST API를 이용하여 상호작용 해보겠습니다.
+
+<br />
+<br />
+<br />
+
+## 
+잠시 GraphQL을 가지고 어떻게 REST API를 감싸는지 알아보겠습니다.
